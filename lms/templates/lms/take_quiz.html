@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ quiz.title }} - Learning Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .quiz-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .quiz-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+    }
+    
+    .quiz-header h1 {
+        margin: 0;
+        font-size: 28px;
+    }
+    
+    .quiz-header p {
+        margin: 10px 0 0 0;
+        opacity: 0.9;
+    }
+    
+    .quiz-form {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .question-block {
+        margin-bottom: 40px;
+        padding-bottom: 30px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .question-block:last-child {
+        border-bottom: none;
+    }
+    
+    .question-number {
+        font-size: 12px;
+        color: #6c757d;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .question-text {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+    }
+    
+    .options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .option {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+    }
+    
+    .option:hover {
+        background: #f8f9fa;
+        border-color: #667eea;
+    }
+    
+    .option input[type="radio"],
+    .option input[type="checkbox"] {
+        margin-right: 15px;
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+    }
+    
+    .option input[type="text"] {
+        flex: 1;
+        margin-left: 15px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    
+    .option input[type="radio"]:checked ~ span,
+    .option input[type="checkbox"]:checked ~ span {
+        color: #667eea;
+        font-weight: bold;
+    }
+    
+    .option.selected {
+        background: #f0f4ff;
+        border-color: #667eea;
+    }
+    
+    .option label {
+        flex: 1;
+        cursor: pointer;
+        margin: 0;
+    }
+    
+    .quiz-footer {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 2px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .btn-submit {
+        padding: 12px 40px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+    
+    .btn-submit:hover {
+        transform: scale(1.05);
+    }
+    
+    .progress-indicator {
+        width: 150px;
+        height: 4px;
+        background: #e9ecef;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        transition: width 0.2s ease;
+    }
+    
+    .quiz-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .info-item {
+        text-align: center;
+    }
+    
+    .info-label {
+        font-size: 12px;
+        color: #6c757d;
+    }
+    
+    .info-value {
+        font-size: 18px;
+        font-weight: bold;
+        color: #667eea;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    <!-- Quiz Header -->
+    <div class="quiz-header">
+        <h1>{{ quiz.title }}</h1>
+        <p>{{ quiz.description }}</p>
+    </div>
+    
+    <!-- Quiz Info -->
+    <div class="quiz-info">
+        <div class="info-item">
+            <div class="info-label">Total Questions</div>
+            <div class="info-value">{{ questions.count }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Passing Score</div>
+            <div class="info-value">{{ quiz.passing_score }}%</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Attempt #</div>
+            <div class="info-value">{{ attempt.attempt_number }}</div>
+        </div>
+    </div>
+    
+    <!-- Quiz Form -->
+    <form method="POST" action="{% url 'lms:submit_quiz' attempt.id %}" class="quiz-form" id="quizForm">
+        {% csrf_token %}
+        
+        {% for question in questions %}
+        <div class="question-block">
+            <div class="question-number">Question {{ forloop.counter }} of {{ questions.count }}</div>
+            <div class="question-text">{{ question.text }}</div>
+            
+            <!-- Progress Bar -->
+            <div class="progress-indicator">
+                <div class="progress-bar" style="width: {{ forloop.counter|add:'-1'|mul:100|div:questions.count }}%;"></div>
+            </div>
+            
+            <div class="options">
+                {% if question.question_type == 'multiple_choice' %}
+                    {% for option in question.options.all %}
+                    <label class="option">
+                        <input type="radio" name="question_{{ question.id }}" value="{{ option.id }}" class="option-input">
+                        <span>{{ option.text }}</span>
+                    </label>
+                    {% endfor %}
+                
+                {% elif question.question_type == 'true_false' %}
+                    {% for option in question.options.all %}
+                    <label class="option">
+                        <input type="radio" name="question_{{ question.id }}" value="{{ option.text|lower }}">
+                        <span>{{ option.text }}</span>
+                    </label>
+                    {% endfor %}
+                
+                {% elif question.question_type == 'short_answer' %}
+                    <label class="option">
+                        <input type="text" name="question_{{ question.id }}" placeholder="Type your answer here...">
+                    </label>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- Footer -->
+        <div class="quiz-footer">
+            <div>
+                <a href="{% url 'lms:course_detail' quiz.course.id %}" style="color: #667eea; text-decoration: none;">
+                    ← Back to Course
+                </a>
+            </div>
+            <button type="submit" class="btn-submit">Submit Quiz 🚀</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Add visual feedback for selected options
+    document.querySelectorAll('.option input').forEach(input => {
+        input.addEventListener('change', function() {
+            document.querySelectorAll('.option.selected').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            this.closest('.option').classList.add('selected');
+        });
+    });
+</script>
+{% endblock %}

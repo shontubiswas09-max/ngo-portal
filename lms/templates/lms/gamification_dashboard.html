@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Gamification Dashboard - Learning Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .gamification-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 10px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        flex: 1;
+        min-width: 150px;
+    }
+    
+    .stats-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        margin-bottom: 30px;
+    }
+    
+    .level-badge {
+        font-size: 48px;
+        font-weight: bold;
+        margin: 20px 0;
+    }
+    
+    .progress-section {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .progress-bar-wrapper {
+        margin: 20px 0;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 30px;
+        background-color: #e9ecef;
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        transition: width 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+    
+    .badge-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .badge {
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        border-radius: 10px;
+        padding: 15px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        transition: transform 0.3s ease;
+    }
+    
+    .badge:hover {
+        transform: scale(1.05);
+    }
+    
+    .badge-icon {
+        font-size: 32px;
+        margin-bottom: 10px;
+    }
+    
+    .badge-label {
+        font-size: 12px;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .transactions-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #e9ecef;
+        transition: background-color 0.2s ease;
+    }
+    
+    .transaction-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .transaction-item:last-child {
+        border-bottom: none;
+    }
+    
+    .points-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    
+    .activity-icon {
+        font-size: 20px;
+        margin-right: 15px;
+        min-width: 20px;
+    }
+    
+    .leaderboard {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .leaderboard-item {
+        display: flex;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .leaderboard-rank {
+        font-size: 20px;
+        font-weight: bold;
+        width: 50px;
+        text-align: center;
+    }
+    
+    .leaderboard-rank.rank-1 {
+        color: #ffd700;
+    }
+    
+    .leaderboard-rank.rank-2 {
+        color: #c0c0c0;
+    }
+    
+    .leaderboard-rank.rank-3 {
+        color: #cd7f32;
+    }
+    
+    .leaderboard-info {
+        flex: 1;
+        margin-left: 20px;
+    }
+    
+    .leaderboard-points {
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .enrollment-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .enrollment-info {
+        flex: 1;
+    }
+    
+    .enrollment-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .enrollment-status {
+        font-size: 12px;
+        color: #6c757d;
+    }
+    
+    .btn-action {
+        padding: 8px 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-action:hover {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="gamification-container">
+    <!-- Header -->
+    <div class="progress-section">
+        <h1>Welcome, {{ beneficiary.name }}! 🎮</h1>
+        <p>Continue your learning journey and earn rewards!</p>
+    </div>
+    
+    <!-- Main Stats -->
+    <div class="stats-container">
+        <div class="stats-card">
+            <div style="font-size: 24px;">Total Points</div>
+            <div class="level-badge">{{ gamification.total_points }}</div>
+        </div>
+        <div class="stats-card">
+            <div style="font-size: 24px;">Current Level</div>
+            <div class="level-badge">{{ gamification.level }}</div>
+        </div>
+        <div class="stats-card">
+            <div style="font-size: 24px;">Streak Days</div>
+            <div class="level-badge">{{ gamification.streak_days }}</div>
+        </div>
+        <div class="stats-card">
+            <div style="font-size: 24px;">Certificates</div>
+            <div class="level-badge">{{ certificates.count }}</div>
+        </div>
+    </div>
+    
+    <!-- Level Progress -->
+    <div class="progress-section">
+        <h2>🎯 Level Progress</h2>
+        <div class="progress-bar-wrapper">
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ current_level_progress }}%;">
+                    {% if current_level_progress > 10 %}{{ current_level_progress|floatformat:0 }}%{% endif %}
+                </div>
+            </div>
+        </div>
+        <p style="margin-top: 10px; color: #6c757d;">
+            {{ gamification.total_points }} / {{ next_level_points }} points to next level
+        </p>
+    </div>
+    
+    <!-- Achievements / Badges -->
+    <div class="progress-section">
+        <h2>🏆 Achievements & Badges</h2>
+        <div class="badge-container">
+            {% if enrollments.count > 0 %}
+            <div class="badge" title="Course Starter">
+                <div class="badge-icon">📚</div>
+                <div class="badge-label">Starter</div>
+            </div>
+            {% endif %}
+            
+            {% if enrollments|length >= 3 %}
+            <div class="badge" title="Course Master">
+                <div class="badge-icon">👑</div>
+                <div class="badge-label">Master</div>
+            </div>
+            {% endif %}
+            
+            {% if gamification.total_points >= 500 %}
+            <div class="badge" title="Point Collector">
+                <div class="badge-icon">⭐</div>
+                <div class="badge-label">Collector</div>
+            </div>
+            {% endif %}
+            
+            {% if certificates.count > 0 %}
+            <div class="badge" title="Certified">
+                <div class="badge-icon">🎓</div>
+                <div class="badge-label">Certified</div>
+            </div>
+            {% endif %}
+            
+            {% if gamification.level >= 3 %}
+            <div class="badge" title="Expert">
+                <div class="badge-icon">🔥</div>
+                <div class="badge-label">Expert</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Enrolled Courses -->
+    <div class="progress-section">
+        <h2>📖 Your Courses</h2>
+        {% if enrollments %}
+            {% for enrollment in enrollments %}
+            <div class="enrollment-card">
+                <div class="enrollment-info">
+                    <div class="enrollment-title">{{ enrollment.course.title }}</div>
+                    <div class="enrollment-status">
+                        {% if enrollment.completed %}
+                            ✓ Completed on {{ enrollment.completion_date|date:"M d, Y" }}
+                        {% else %}
+                            In Progress
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{% url 'lms:course_detail' enrollment.course.id %}" class="btn-action">
+                    Continue Course
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>You haven't enrolled in any courses yet. <a href="{% url 'lms:course_list' %}">Browse courses</a></p>
+        {% endif %}
+    </div>
+    
+    <!-- Recent Activity -->
+    <div class="progress-section">
+        <h2>⚡ Recent Activity</h2>
+        {% if transactions %}
+        <ul class="transactions-list">
+            {% for transaction in transactions %}
+            <li class="transaction-item">
+                <div style="display: flex; align-items: center;">
+                    <span class="activity-icon">
+                        {% if transaction.activity_type == 'course_completion' %}📚
+                        {% elif transaction.activity_type == 'quiz_passed' %}✅
+                        {% elif transaction.activity_type == 'certification' %}🎓
+                        {% elif transaction.activity_type == 'attendance' %}📅
+                        {% elif transaction.activity_type == 'participation' %}🙋
+                        {% endif %}
+                    </span>
+                    <div>
+                        <div style="font-weight: bold;">{{ transaction.get_activity_type_display }}</div>
+                        <small style="color: #6c757d;">{{ transaction.created_at|timesince }} ago</small>
+                    </div>
+                </div>
+                <span class="points-badge">+{{ transaction.points_earned }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+            <p>No activity yet. Start learning and earn points!</p>
+        {% endif %}
+    </div>
+    
+    <!-- Certificates -->
+    {% if certificates %}
+    <div class="progress-section">
+        <h2>🎖️ Certificates Earned</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+            {% for cert in certificates %}
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 24px; margin-bottom: 10px;">🎓</div>
+                <div style="font-weight: bold; margin-bottom: 5px;">{{ cert.certification.title }}</div>
+                <small>Issued: {{ cert.issued_date|date:"M d, Y" }}</small>
+                <div style="font-size: 10px; margin-top: 10px;">Cert #: {{ cert.certificate_number }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

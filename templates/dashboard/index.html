@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - NGO Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main content -->
+        <main class="col-12 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Dashboard</h1>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ projects_count }}</h5>
+                            <p class="card-text">Total Projects</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ donors_count }}</h5>
+                            <p class="card-text">Total Donors</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ beneficiaries_count }}</h5>
+                            <p class="card-text">Total Beneficiaries</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 mb-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ courses_count }}</h5>
+                            <p class="card-text">Active Courses</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Donor Contributions</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="donorChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Literacy Levels</h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="literacyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Chart.js Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Donor Chart
+    const donorCtx = document.getElementById('donorChart').getContext('2d');
+    const donorData = {{ donor_data|safe }};
+    new Chart(donorCtx, {
+        type: 'bar',
+        data: {
+            labels: donorData.map(item => item.name),
+            datasets: [{
+                label: 'Number of Donations',
+                data: donorData.map(item => item.donation_count),
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Literacy Chart
+    const literacyCtx = document.getElementById('literacyChart').getContext('2d');
+    const literacyData = {{ literacy_data|safe }};
+    new Chart(literacyCtx, {
+        type: 'pie',
+        data: {
+            labels: literacyData.map(item => item.literacy_level),
+            datasets: [{
+                label: 'Beneficiaries by Literacy Level',
+                data: literacyData.map(item => item.count),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 205, 86, 0.5)',
+                    'rgba(75, 192, 192, 0.5)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 205, 86, 1)',
+                    'rgba(75, 192, 192, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>
+{% endblock %}

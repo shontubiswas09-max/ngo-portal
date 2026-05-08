@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ lesson.title }} - Learning Portal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .lesson-container {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .lesson-main {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .lesson-header {
+        margin-bottom: 30px;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 15px;
+    }
+    
+    .lesson-header h1 {
+        margin: 0;
+        color: #333;
+    }
+    
+    .lesson-meta {
+        color: #6c757d;
+        font-size: 14px;
+        margin-top: 10px;
+    }
+    
+    .lesson-content {
+        line-height: 1.8;
+        color: #333;
+        margin-bottom: 30px;
+    }
+    
+    .lesson-content h2,
+    .lesson-content h3 {
+        color: #667eea;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+    
+    .video-container {
+        margin: 20px 0;
+        background: #000;
+        border-radius: 10px;
+        overflow: hidden;
+        aspect-ratio: 16 / 9;
+    }
+    
+    .video-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+    
+    .navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .btn-nav {
+        padding: 10px 20px;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        transition: background 0.2s ease;
+    }
+    
+    .btn-nav:hover {
+        background: #5568d3;
+    }
+    
+    .btn-nav:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+    
+    .nav-info {
+        font-size: 12px;
+        color: #6c757d;
+    }
+    
+    .sidebar {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .sidebar h3 {
+        margin-top: 0;
+        color: #667eea;
+        border-bottom: 2px solid #667eea;
+        padding-bottom: 10px;
+    }
+    
+    .lessons-sidebar {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .lessons-sidebar li {
+        padding: 12px;
+        border-bottom: 1px solid #e9ecef;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    
+    .lessons-sidebar li:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .lessons-sidebar li.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 5px;
+        border: none;
+    }
+    
+    .lessons-sidebar li a {
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .lesson-number {
+        font-size: 11px;
+        opacity: 0.8;
+    }
+    
+    @media (max-width: 768px) {
+        .lesson-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .sidebar {
+            max-height: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lesson-container">
+    <!-- Main Content -->
+    <div class="lesson-main">
+        <div class="lesson-header">
+            <h1>{{ lesson.title }}</h1>
+            <div class="lesson-meta">
+                {{ course.title }} • Lesson {{ current_lesson_index }} of {{ total_lessons }}
+            </div>
+        </div>
+        
+        <!-- Video if available -->
+        {% if lesson.video_url %}
+        <div class="video-container">
+            <iframe src="{{ lesson.video_url }}" allowfullscreen></iframe>
+        </div>
+        {% endif %}
+        
+        <!-- Lesson Content -->
+        <div class="lesson-content">
+            {{ lesson.content|safe }}
+        </div>
+        
+        <!-- Navigation -->
+        <div class="navigation">
+            <div>
+                {% if prev_lesson %}
+                <a href="{% url 'lms:lesson_detail' course.id prev_lesson.id %}" class="btn-nav">
+                    ← Previous Lesson
+                </a>
+                {% else %}
+                <button class="btn-nav" disabled>← Previous Lesson</button>
+                {% endif %}
+            </div>
+            <div class="nav-info">
+                Lesson {{ current_lesson_index }} of {{ total_lessons }}
+            </div>
+            <div>
+                {% if next_lesson %}
+                <a href="{% url 'lms:lesson_detail' course.id next_lesson.id %}" class="btn-nav">
+                    Next Lesson →
+                </a>
+                {% else %}
+                <button class="btn-nav" disabled>Next Lesson →</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h3>📚 Course Content</h3>
+        <ul class="lessons-sidebar">
+            {% for l in lessons %}
+            <li class="{% if l.id == lesson.id %}active{% endif %}">
+                <a href="{% url 'lms:lesson_detail' course.id l.id %}">
+                    <div><strong>{{ l.title }}</strong></div>
+                    <div class="lesson-number">Lesson {{ forloop.counter }}</div>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+        
+        <h3 style="margin-top: 20px;">📝 Quizzes</h3>
+        {% if course.quizzes.all %}
+        <div style="list-style: none; padding: 0;">
+            {% for quiz in course.quizzes.all %}
+            <a href="{% url 'lms:take_quiz' quiz.id %}" style="display: block; padding: 10px; background: #667eea; color: white; border-radius: 5px; text-decoration: none; margin-bottom: 8px; text-align: center;">
+                {{ quiz.title }}
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="font-size: 12px; color: #6c757d;">No quizzes available.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
