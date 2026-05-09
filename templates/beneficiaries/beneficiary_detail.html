@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ beneficiary.name }} - Beneficiary Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main content -->
+        <main class="col-12 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">{{ beneficiary.name }}</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'beneficiaries:edit_beneficiary' beneficiary.id %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'beneficiaries:beneficiary_list' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">Beneficiary Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-3">Name:</dt>
+                                <dd class="col-sm-9">{{ beneficiary.name }}</dd>
+
+                                <dt class="col-sm-3">Village:</dt>
+                                <dd class="col-sm-9">{{ beneficiary.village }}</dd>
+
+                                <dt class="col-sm-3">Project:</dt>
+                                <dd class="col-sm-9">{{ beneficiary.project.name }}</dd>
+
+                                <dt class="col-sm-3">Livelihood Activity:</dt>
+                                <dd class="col-sm-9">{{ beneficiary.livelihood_activity }}</dd>
+
+                                <dt class="col-sm-3">Literacy Level:</dt>
+                                <dd class="col-sm-9">{{ beneficiary.literacy_level }}</dd>
+
+                                <dt class="col-sm-3">Attendance:</dt>
+                                <dd class="col-sm-9">{{ beneficiary.attendance }}</dd>
+
+                                <dt class="col-sm-3">Courses Completed:</dt>
+                                <dd class="col-sm-9">{{ beneficiary.courses_completed }}</dd>
+
+                                {% if beneficiary.skills %}
+                                <dt class="col-sm-3">Skills:</dt>
+                                <dd class="col-sm-9">{{ beneficiary.skills }}</dd>
+                                {% endif %}
+
+                                {% if beneficiary.training_history %}
+                                <dt class="col-sm-3">Training History:</dt>
+                                <dd class="col-sm-9">{{ beneficiary.training_history }}</dd>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

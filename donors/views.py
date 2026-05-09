@@ -57,3 +57,7 @@ def edit_donor(request, pk):
             messages.error(request, f'Error updating donor: {str(e)}')
     
     return render(request, 'donors/add_donor.html', {'donor': donor})
+
+def donor_detail(request, pk):
+    donor = get_object_or_404(Donor, pk=pk)
+    return render(request, 'donors/donor_detail.html', {'donor': donor})

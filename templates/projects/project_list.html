@@ -31,7 +31,7 @@
                             <p class="card-text">{{ project.description|truncatechars:100 }}</p>
                         </div>
                         <div class="card-footer">
-                            <a href="#" class="btn btn-primary btn-sm" onclick="openProjectDetail(event, {{ project.id }})">
+                            <a href="{% url 'projects:project_detail' project.id %}" class="btn btn-primary btn-sm" onclick="openProjectDetail(event, {{ project.id }})">
                                 <i class="fas fa-eye"></i> View Details
                             </a>
                             {% if user.is_authenticated %}

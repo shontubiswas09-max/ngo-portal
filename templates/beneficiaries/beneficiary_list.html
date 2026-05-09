@@ -44,7 +44,7 @@
                             <td>{{ beneficiary.attendance }}</td>
                             <td>{{ beneficiary.courses_completed }}</td>
                             <td>
-                                <a href="#" class="btn btn-sm btn-outline-primary" onclick="openBeneficiaryDetail(event, {{ beneficiary.id }})">
+                                <a href="{% url 'beneficiaries:beneficiary_detail' beneficiary.id %}" class="btn btn-sm btn-outline-primary">
                                     <i class="fas fa-eye"></i> View
                                 </a>
                                 {% if user.is_authenticated %}

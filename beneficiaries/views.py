@@ -83,3 +83,7 @@ def edit_beneficiary(request, pk):
     from projects.models import Project
     projects = Project.objects.all()
     return render(request, 'beneficiaries/add_beneficiary.html', {'beneficiary': beneficiary, 'projects': projects})
+
+def beneficiary_detail(request, pk):
+    beneficiary = get_object_or_404(Beneficiary, pk=pk)
+    return render(request, 'beneficiaries/beneficiary_detail.html', {'beneficiary': beneficiary})

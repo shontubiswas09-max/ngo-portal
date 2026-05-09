@@ -56,3 +56,7 @@ def edit_report(request, pk):
             messages.error(request, f'Error updating report: {str(e)}')
     
     return render(request, 'reports/add_report.html', {'report': report})
+
+def report_detail(request, pk):
+    report = get_object_or_404(Report, pk=pk)
+    return render(request, 'reports/report_detail.html', {'report': report})

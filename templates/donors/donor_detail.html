@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ donor.name }} - Donor Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main content -->
+        <main class="col-12 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">{{ donor.name }}</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'donors:edit_donor' donor.id %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'donors:donor_list' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">Donor Information</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if donor.profile_picture %}
+                            <div class="text-center mb-3">
+                                <img src="{{ donor.profile_picture.url }}" alt="{{ donor.name }}" class="img-fluid rounded" style="max-width: 200px;">
+                            </div>
+                            {% endif %}
+
+                            <dl class="row">
+                                <dt class="col-sm-3">Name:</dt>
+                                <dd class="col-sm-9">{{ donor.name }}</dd>
+
+                                {% if donor.email %}
+                                <dt class="col-sm-3">Email:</dt>
+                                <dd class="col-sm-9"><a href="mailto:{{ donor.email }}">{{ donor.email }}</a></dd>
+                                {% endif %}
+
+                                {% if donor.phone %}
+                                <dt class="col-sm-3">Phone:</dt>
+                                <dd class="col-sm-9"><a href="tel:{{ donor.phone }}">{{ donor.phone }}</a></dd>
+                                {% endif %}
+
+                                {% if donor.document %}
+                                <dt class="col-sm-3">Document:</dt>
+                                <dd class="col-sm-9">
+                                    <a href="{{ donor.document.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-download"></i> Download Document
+                                    </a>
+                                </dd>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

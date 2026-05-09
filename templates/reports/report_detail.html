@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ report.report_name }} - Report Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main content -->
+        <main class="col-12 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">{{ report.report_name }}</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'reports:edit_report' report.id %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'reports:report_list' %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Back to List
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">Report Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row">
+                                <dt class="col-sm-3">Module:</dt>
+                                <dd class="col-sm-9">{{ report.module_name }}</dd>
+
+                                <dt class="col-sm-3">Report Name:</dt>
+                                <dd class="col-sm-9">{{ report.report_name }}</dd>
+
+                                <dt class="col-sm-3">Generated On:</dt>
+                                <dd class="col-sm-9">{{ report.generated_on|date:"M d, Y H:i" }}</dd>
+
+                                {% if report.file %}
+                                <dt class="col-sm-3">File:</dt>
+                                <dd class="col-sm-9">
+                                    <a href="{{ report.file.url }}" target="_blank" class="btn btn-outline-primary">
+                                        <i class="fas fa-download"></i> Download Report
+                                    </a>
+                                </dd>
+                                {% endif %}
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

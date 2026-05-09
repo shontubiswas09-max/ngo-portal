@@ -56,3 +56,7 @@ def edit_project(request, pk):
             messages.error(request, f'Error updating project: {str(e)}')
     
     return render(request, 'projects/add_project.html', {'project': project})
+
+def project_detail(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    return render(request, 'projects/project_detail.html', {'project': project})
