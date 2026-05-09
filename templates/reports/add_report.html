@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Generate Report - NGO Portal{% endblock %}
+{% block title %}{% if report %}Edit{% else %}Generate{% endif %} Report - NGO Portal{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -8,12 +8,12 @@
         <!-- Main content -->
         <main class="col-12 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Generate Report</h1>
+                <h1 class="h2">{% if report %}Edit{% else %}Generate{% endif %} Report</h1>
             </div>
 
             {% if not user.is_authenticated %}
                 <div class="alert alert-warning" role="alert">
-                    <i class="fas fa-lock"></i> You must be logged in to generate reports. <a href="{% url 'admin:login' %}" class="alert-link">Login here</a>
+                    <i class="fas fa-lock"></i> You must be logged in to {% if report %}edit{% else %}generate{% endif %} reports. <a href="{% url 'admin:login' %}" class="alert-link">Login here</a>
                 </div>
             {% else %}
                 {% if messages %}
@@ -33,22 +33,25 @@
                                 <label for="module_name" class="form-label">Module <span class="text-danger">*</span></label>
                                 <select class="form-control" id="module_name" name="module_name" required>
                                     <option value="">Select Module</option>
-                                    <option value="Beneficiaries">Beneficiaries</option>
-                                    <option value="Projects">Projects</option>
-                                    <option value="LMS">Learning Management</option>
-                                    <option value="Donors">Donors</option>
+                                    <option value="Beneficiaries" {% if report and report.module_name == 'Beneficiaries' %}selected{% endif %}>Beneficiaries</option>
+                                    <option value="Projects" {% if report and report.module_name == 'Projects' %}selected{% endif %}>Projects</option>
+                                    <option value="LMS" {% if report and report.module_name == 'LMS' %}selected{% endif %}>Learning Management</option>
+                                    <option value="Donors" {% if report and report.module_name == 'Donors' %}selected{% endif %}>Donors</option>
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label for="report_name" class="form-label">Report Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="report_name" name="report_name" required>
+                                <input type="text" class="form-control" id="report_name" name="report_name" value="{% if report %}{{ report.report_name }}{% endif %}" required>
                             </div>
                             <div class="mb-3">
                                 <label for="file" class="form-label">Report File (optional)</label>
                                 <input type="file" class="form-control" id="file" name="file">
+                                {% if report and report.file %}
+                                <small class="form-text text-muted">Current: <a href="{{ report.file.url }}" target="_blank">{{ report.file.name }}</a></small>
+                                {% endif %}
                             </div>
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">Generate Report</button>
+                                <button type="submit" class="btn btn-primary">{% if report %}Update{% else %}Generate{% endif %} Report</button>
                                 <a href="{% url 'reports:report_list' %}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>

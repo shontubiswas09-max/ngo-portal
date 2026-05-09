@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Beneficiary
@@ -44,3 +44,42 @@ def add_beneficiary(request):
     from projects.models import Project
     projects = Project.objects.all()
     return render(request, 'beneficiaries/add_beneficiary.html', {'projects': projects})
+
+@login_required(login_url='admin:login')
+def edit_beneficiary(request, pk):
+    beneficiary = get_object_or_404(Beneficiary, pk=pk)
+    if request.method == 'POST':
+        try:
+            name = request.POST.get('name')
+            village = request.POST.get('village')
+            project_id = request.POST.get('project')
+            livelihood_activity = request.POST.get('livelihood_activity')
+            literacy_level = request.POST.get('literacy_level')
+            skills = request.POST.get('skills')
+            training_history = request.POST.get('training_history')
+            
+            if not name or not village or not project_id:
+                messages.error(request, 'Please fill in all required fields.')
+                from projects.models import Project
+                projects = Project.objects.all()
+                return render(request, 'beneficiaries/add_beneficiary.html', {'beneficiary': beneficiary, 'projects': projects})
+            
+            from projects.models import Project
+            project = Project.objects.get(id=project_id)
+            
+            beneficiary.name = name
+            beneficiary.village = village
+            beneficiary.project = project
+            beneficiary.livelihood_activity = livelihood_activity
+            beneficiary.literacy_level = literacy_level
+            beneficiary.skills = skills
+            beneficiary.training_history = training_history
+            beneficiary.save()
+            messages.success(request, f'Beneficiary {name} updated successfully!')
+            return redirect('beneficiaries:beneficiary_list')
+        except Exception as e:
+            messages.error(request, f'Error updating beneficiary: {str(e)}')
+    
+    from projects.models import Project
+    projects = Project.objects.all()
+    return render(request, 'beneficiaries/add_beneficiary.html', {'beneficiary': beneficiary, 'projects': projects})

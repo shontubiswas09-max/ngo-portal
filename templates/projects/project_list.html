@@ -35,7 +35,7 @@
                                 <i class="fas fa-eye"></i> View Details
                             </a>
                             {% if user.is_authenticated %}
-                            <a href="#" class="btn btn-outline-secondary btn-sm">Edit</a>
+                            <a href="{% url 'projects:edit_project' project.id %}" class="btn btn-outline-secondary btn-sm">Edit</a>
                             {% endif %}
                         </div>
                     </div>

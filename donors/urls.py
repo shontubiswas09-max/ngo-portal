@@ -6,4 +6,5 @@ app_name = 'donors'
 urlpatterns = [
     path('', views.donor_list, name='donor_list'),
     path('add/', views.add_donor, name='add_donor'),
+    path('edit/<int:pk>/', views.edit_donor, name='edit_donor'),
 ]

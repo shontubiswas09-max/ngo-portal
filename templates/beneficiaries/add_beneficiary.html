@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Add Beneficiary - NGO Portal{% endblock %}
+{% block title %}{% if beneficiary %}Edit{% else %}Add{% endif %} Beneficiary - NGO Portal{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
@@ -8,12 +8,12 @@
         <!-- Main content -->
         <main class="col-12 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Add Beneficiary</h1>
+                <h1 class="h2">{% if beneficiary %}Edit{% else %}Add{% endif %} Beneficiary</h1>
             </div>
 
             {% if not user.is_authenticated %}
                 <div class="alert alert-warning" role="alert">
-                    <i class="fas fa-lock"></i> You must be logged in to add beneficiaries. <a href="{% url 'admin:login' %}" class="alert-link">Login here</a>
+                    <i class="fas fa-lock"></i> You must be logged in to {% if beneficiary %}edit{% else %}add{% endif %} beneficiaries. <a href="{% url 'admin:login' %}" class="alert-link">Login here</a>
                 </div>
             {% else %}
                 {% if messages %}
@@ -31,44 +31,44 @@
                             {% csrf_token %}
                             <div class="mb-3">
                                 <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="name" name="name" required>
+                                <input type="text" class="form-control" id="name" name="name" value="{% if beneficiary %}{{ beneficiary.name }}{% endif %}" required>
                             </div>
                             <div class="mb-3">
                                 <label for="village" class="form-label">Village <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="village" name="village" required>
+                                <input type="text" class="form-control" id="village" name="village" value="{% if beneficiary %}{{ beneficiary.village }}{% endif %}" required>
                             </div>
                             <div class="mb-3">
                                 <label for="project" class="form-label">Project <span class="text-danger">*</span></label>
                                 <select class="form-control" id="project" name="project" required>
                                     <option value="">Select Project</option>
                                     {% for project in projects %}
-                                        <option value="{{ project.id }}">{{ project.name }}</option>
+                                        <option value="{{ project.id }}" {% if beneficiary and beneficiary.project.id == project.id %}selected{% endif %}>{{ project.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label for="livelihood_activity" class="form-label">Livelihood Activity <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="livelihood_activity" name="livelihood_activity" required>
+                                <input type="text" class="form-control" id="livelihood_activity" name="livelihood_activity" value="{% if beneficiary %}{{ beneficiary.livelihood_activity }}{% endif %}" required>
                             </div>
                             <div class="mb-3">
                                 <label for="literacy_level" class="form-label">Literacy Level</label>
                                 <select class="form-control" id="literacy_level" name="literacy_level">
-                                    <option value="None">None</option>
-                                    <option value="Primary">Primary</option>
-                                    <option value="Secondary">Secondary</option>
-                                    <option value="Higher">Higher</option>
+                                    <option value="None" {% if beneficiary and beneficiary.literacy_level == 'None' %}selected{% endif %}>None</option>
+                                    <option value="Primary" {% if beneficiary and beneficiary.literacy_level == 'Primary' %}selected{% endif %}>Primary</option>
+                                    <option value="Secondary" {% if beneficiary and beneficiary.literacy_level == 'Secondary' %}selected{% endif %}>Secondary</option>
+                                    <option value="Higher" {% if beneficiary and beneficiary.literacy_level == 'Higher' %}selected{% endif %}>Higher</option>
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label for="skills" class="form-label">Skills</label>
-                                <textarea class="form-control" id="skills" name="skills" rows="3"></textarea>
+                                <textarea class="form-control" id="skills" name="skills" rows="3">{% if beneficiary %}{{ beneficiary.skills }}{% endif %}</textarea>
                             </div>
                             <div class="mb-3">
                                 <label for="training_history" class="form-label">Training History</label>
-                                <textarea class="form-control" id="training_history" name="training_history" rows="3"></textarea>
+                                <textarea class="form-control" id="training_history" name="training_history" rows="3">{% if beneficiary %}{{ beneficiary.training_history }}{% endif %}</textarea>
                             </div>
                             <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">Add Beneficiary</button>
+                                <button type="submit" class="btn btn-primary">{% if beneficiary %}Update{% else %}Add{% endif %} Beneficiary</button>
                                 <a href="{% url 'beneficiaries:beneficiary_list' %}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </form>

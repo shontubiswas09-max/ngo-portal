@@ -48,7 +48,7 @@
                                     <i class="fas fa-eye"></i> View
                                 </a>
                                 {% if user.is_authenticated %}
-                                <a href="#" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                <a href="{% url 'beneficiaries:edit_beneficiary' beneficiary.id %}" class="btn btn-sm btn-outline-secondary">Edit</a>
                                 {% endif %}
                             </td>
                         </tr>

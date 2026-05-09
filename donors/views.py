@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Donor
@@ -31,3 +31,29 @@ def add_donor(request):
             messages.error(request, f'Error adding donor: {str(e)}')
     
     return render(request, 'donors/add_donor.html')
+
+@login_required(login_url='admin:login')
+def edit_donor(request, pk):
+    donor = get_object_or_404(Donor, pk=pk)
+    if request.method == 'POST':
+        try:
+            name = request.POST.get('name')
+            email = request.POST.get('email')
+            phone = request.POST.get('phone')
+            profile_picture = request.FILES.get('profile_picture')
+            document = request.FILES.get('document')
+            
+            donor.name = name
+            donor.email = email
+            donor.phone = phone
+            if profile_picture:
+                donor.profile_picture = profile_picture
+            if document:
+                donor.document = document
+            donor.save()
+            messages.success(request, f'Donor {name} updated successfully!')
+            return redirect('donors:donor_list')
+        except Exception as e:
+            messages.error(request, f'Error updating donor: {str(e)}')
+    
+    return render(request, 'donors/add_donor.html', {'donor': donor})
