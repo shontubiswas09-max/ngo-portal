@@ -33,7 +33,7 @@ def sidebar_stats(request):
         if 'status' in project_field_names:
             projects_completed = Project.objects.filter(status='completed').count()
         else:
-            projects_completed = 0
+            projects_completed = 0  # Default to 0 if no status field
 
         # Overall stats
         total_projects = projects_count

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Beneficiaries - NGO Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main content -->
+        <main class="col-12 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Beneficiaries</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'beneficiaries:add_beneficiary' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-plus"></i> Add Beneficiary
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Beneficiaries Table -->
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Village</th>
+                            <th>Project</th>
+                            <th>Livelihood Activity</th>
+                            <th>Literacy Level</th>
+                            <th>Attendance</th>
+                            <th>Courses Completed</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for beneficiary in beneficiaries %}
+                        <tr>
+                            <td>{{ beneficiary.name }}</td>
+                            <td>{{ beneficiary.village }}</td>
+                            <td>{{ beneficiary.project.name }}</td>
+                            <td>{{ beneficiary.livelihood_activity }}</td>
+                            <td>{{ beneficiary.literacy_level }}</td>
+                            <td>{{ beneficiary.attendance }}</td>
+                            <td>{{ beneficiary.courses_completed }}</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary" onclick="openBeneficiaryDetail(event, {{ beneficiary.id }})">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                {% if user.is_authenticated %}
+                                <a href="#" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No beneficiaries found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

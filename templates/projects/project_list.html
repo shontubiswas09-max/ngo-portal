@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Projects - NGO Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main content -->
+        <main class="col-12 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Projects</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'projects:add_project' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-plus"></i> Add Project
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Projects Grid -->
+            <div class="row">
+                {% for project in projects %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        {% if project.image %}
+                        <img src="{{ project.image.url }}" class="card-img-top" alt="{{ project.name }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ project.name }}</h5>
+                            <p class="card-text">{{ project.description|truncatechars:100 }}</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="#" class="btn btn-primary btn-sm" onclick="openProjectDetail(event, {{ project.id }})">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                            {% if user.is_authenticated %}
+                            <a href="#" class="btn btn-outline-secondary btn-sm">Edit</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        No projects found.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
