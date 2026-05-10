@@ -143,3 +143,6 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'danger',
 }
+
+# Authentication
+LOGIN_URL = 'admin:login'

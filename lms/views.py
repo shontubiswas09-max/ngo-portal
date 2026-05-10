@@ -56,7 +56,7 @@ def enroll_course(request, course_id):
     try:
         beneficiary = Beneficiary.objects.get(user=request.user)
     except:
-        return redirect('course_list')
+        return redirect('lms:course_list')
     
     enrollment, created = Enrollment.objects.get_or_create(
         course=course,
@@ -116,7 +116,7 @@ def take_quiz(request, quiz_id):
     try:
         beneficiary = Beneficiary.objects.get(user=request.user)
     except:
-        return redirect('course_list')
+        return redirect('lms:course_list')
     
     # Get or create quiz attempt
     attempt_number = QuizAttempt.objects.filter(
@@ -213,7 +213,7 @@ def gamification_dashboard(request):
     try:
         beneficiary = Beneficiary.objects.get(user=request.user)
     except:
-        return redirect('course_list')
+        return redirect('lms:course_list')
     
     gamification = GamificationPoints.objects.get_or_create(
         beneficiary=beneficiary
@@ -257,7 +257,7 @@ def learner_dashboard(request):
     try:
         beneficiary = Beneficiary.objects.get(user=request.user)
     except:
-        return redirect('course_list')
+        return redirect('lms:course_list')
     
     # Get enrolled courses
     enrollments = beneficiary.course_enrollments.all()
@@ -299,7 +299,7 @@ def teacher_dashboard(request):
     try:
         teacher = Teacher.objects.get(user=request.user)
     except:
-        return redirect('course_list')
+        return redirect('lms:course_list')
     
     courses = teacher.courses.all()
     
@@ -310,7 +310,7 @@ def teacher_dashboard(request):
         'total_quizzes': Quiz.objects.filter(course__in=courses).count(),
         'average_quiz_score': QuizAttempt.objects.filter(quiz__course__in=courses).exclude(
             score__isnull=True
-        ).values('quiz__course').annotate(avg_score=models.Avg('score'))
+        ).values('quiz__course').annotate(avg_score=Avg('score'))
     }
     
     context = {
