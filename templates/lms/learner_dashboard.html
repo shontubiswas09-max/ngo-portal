@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}My Learning Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <main class="col-12 px-md-4">
+            <div class="pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">My Learning Dashboard</h1>
+                <p class="text-muted">{{ beneficiary.name }} - Track your learning progress</p>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <h5 class="card-title">Courses Enrolled</h5>
+                            <h2>{{ progress_data.total_courses }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <h5 class="card-title">Courses Completed</h5>
+                            <h2>{{ progress_data.completed_courses }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <h5 class="card-title">Quizzes Passed</h5>
+                            <h2>{{ progress_data.quizzes_passed }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <h5 class="card-title">Certificates Earned</h5>
+                            <h2>{{ progress_data.certificates_earned }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Recommendation -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-primary" role="alert">
+                        <h4 class="alert-heading">Learning Recommendation</h4>
+                        <p>{{ learning_recommendation }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enrolled Courses -->
+            <div class="row">
+                <div class="col-12">
+                    <h3>My Enrolled Courses</h3>
+                    {% if enrollments %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Course</th>
+                                    <th>Instructor</th>
+                                    <th>Level</th>
+                                    <th>Status</th>
+                                    <th>Enrolled Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for enrollment in enrollments %}
+                                <tr>
+                                    <td>{{ enrollment.course.title }}</td>
+                                    <td>{{ enrollment.course.teacher }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ enrollment.course.difficulty_level|title }}</span>
+                                    </td>
+                                    <td>
+                                        {% if enrollment.completed %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">In Progress</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ enrollment.enrolled_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'lms:course_detail' enrollment.course.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        You haven't enrolled in any courses yet. <a href="{% url 'lms:course_list' %}">Browse courses</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Gamification Stats -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">Gamification Points</h5>
+                        </div>
+                        <div class="card-body">
+                            <h2 class="text-primary">{{ gamification.total_points }} Points</h2>
+                            <p class="text-muted">Level {{ gamification.level }}</p>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" role="progressbar" 
+                                     style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                            </div>
+                            <small class="text-muted">Progress to next level</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="card-title mb-0">Certificates</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if progress_data.certificates_earned > 0 %}
+                            <p>You have earned <strong>{{ progress_data.certificates_earned }}</strong> certificate(s).</p>
+                            <a href="{% url 'lms:gamification_dashboard' %}" class="btn btn-sm btn-outline-success">
+                                <i class="fas fa-trophy"></i> View All Certificates
+                            </a>
+                            {% else %}
+                            <p class="text-muted">You haven't earned any certificates yet.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}
