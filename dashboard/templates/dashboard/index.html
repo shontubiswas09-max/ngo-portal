@@ -33,6 +33,23 @@
         margin-bottom: 20px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         border-left: 4px solid #667eea;
+        position: relative;
+    }
+
+    .chart-empty {
+        position: absolute;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #6c757d;
+        font-size: 1rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.92);
+        border-radius: 10px;
+        pointer-events: none;
+        padding: 1rem;
     }
 
     .chart-container h2 {
@@ -251,14 +268,49 @@
         <div class="chart-container">
             <h2><i class="fas fa-hand-holding-heart"></i> Donor Contributions</h2>
             <canvas id="donorChart" width="400" height="300"></canvas>
+            <div class="chart-empty" id="donorChartEmpty">No data available</div>
         </div>
     </div>
 
     <div class="col-md-6">
-        <!-- Beneficiary Demographics Chart -->
+        <!-- Beneficiary Literacy Chart -->
         <div class="chart-container">
-            <h2><i class="fas fa-chart-pie"></i> Beneficiary Demographics</h2>
-            <canvas id="genderChart" width="400" height="300"></canvas>
+            <h2><i class="fas fa-chart-pie"></i> Beneficiary Literacy Levels</h2>
+            <canvas id="literacyChart" width="400" height="300"></canvas>
+            <div class="chart-empty" id="literacyChartEmpty">No data available</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h2><i class="fas fa-project-diagram"></i> Project Beneficiaries</h2>
+            <canvas id="projectChart" width="400" height="300"></canvas>
+            <div class="chart-empty" id="projectChartEmpty">No data available</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h2><i class="fas fa-book-open"></i> Course Enrollments</h2>
+            <canvas id="courseChart" width="400" height="300"></canvas>
+            <div class="chart-empty" id="courseChartEmpty">No data available</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h2><i class="fas fa-dollar-sign"></i> Monthly Donation Trends</h2>
+            <canvas id="donationChart" width="400" height="300"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="chart-container">
+            <h2><i class="fas fa-calendar-check"></i> Attendance Distribution</h2>
+            <canvas id="attendanceChart" width="400" height="300"></canvas>
+            <div class="chart-empty" id="attendanceChartEmpty">No data available</div>
         </div>
     </div>
 </div>
@@ -307,16 +359,25 @@
 
 {% block extra_js %}
 <script>
+    function setChartFallback(fallbackId, labels, datasets) {
+        const fallback = document.getElementById(fallbackId);
+        const hasLabels = Array.isArray(labels) && labels.length > 0;
+        const hasData = Array.isArray(datasets) && datasets.some(ds => Array.isArray(ds.data) && ds.data.length > 0);
+        fallback.style.display = hasLabels && hasData ? 'none' : 'flex';
+    }
+
     // Donor pie chart
     const donorCtx = document.getElementById('donorChart').getContext('2d');
+    const donorLabels = [{% for d in donor_data %}'{{ d.name|escapejs }}',{% endfor %}];
+    const donorDataset = [{
+        data: [{% for d in donor_data %}{{ d.donation_count|default:0 }},{% endfor %}],
+        backgroundColor: ['#4caf50','#2196f3','#ff9800','#ff5722','#9c27b0','#00bcd4','#8bc34a']
+    }];
     new Chart(donorCtx, {
         type: 'pie',
         data: {
-            labels: [{% for d in donor_data %}'{{ d.name }}',{% endfor %}],
-            datasets: [{
-                data: [{% for d in donor_data %}{{ d.donation_count|default:0 }},{% endfor %}],
-                backgroundColor: ['#4caf50','#2196f3','#ff9800','#ff5722','#9c27b0','#00bcd4','#8bc34a']
-            }]
+            labels: donorLabels,
+            datasets: donorDataset
         },
         options: {
             responsive: true,
@@ -327,23 +388,126 @@
             }
         }
     });
+    setChartFallback('donorChartEmpty', donorLabels, donorDataset);
 
-    // Gender pie chart
-    const genderCtx = document.getElementById('genderChart').getContext('2d');
-    new Chart(genderCtx, {
+    // Literacy pie chart
+    const literacyCtx = document.getElementById('literacyChart').getContext('2d');
+    const literacyLabels = [{% for g in literacy_data %}'{{ g.literacy_level|escapejs }}',{% endfor %}];
+    const literacyDataset = [{
+        data: [{% for g in literacy_data %}{{ g.count|default:0 }},{% endfor %}],
+        backgroundColor: ['#3f51b5','#e91e63','#00bcd4','#4caf50','#ff9800']
+    }];
+    new Chart(literacyCtx, {
         type: 'pie',
         data: {
-            labels: [{% for g in gender_data %}'{{ g.gender }}',{% endfor %}],
-            datasets: [{
-                data: [{% for g in gender_data %}{{ g.count }},{% endfor %}],
-                backgroundColor: ['#3f51b5','#e91e63','#00bcd4','#4caf50','#ff9800']
-            }]
+            labels: literacyLabels,
+            datasets: literacyDataset
         },
         options: {
             responsive: true,
             plugins: {
                 legend: {
                     position: 'bottom',
+                }
+            }
+        }
+    });
+    setChartFallback('literacyChartEmpty', literacyLabels, literacyDataset);
+
+    // Project beneficiaries bar chart
+    const projectCtx = document.getElementById('projectChart').getContext('2d');
+    const projectLabels = [{% for p in project_data %}'{{ p.name|escapejs }}',{% endfor %}];
+    const projectDataset = [{
+        label: 'Beneficiaries',
+        data: [{% for p in project_data %}{{ p.beneficiary_count|default:0 }},{% endfor %}],
+        backgroundColor: '#42a5f5'
+    }];
+    new Chart(projectCtx, {
+        type: 'bar',
+        data: {
+            labels: projectLabels,
+            datasets: projectDataset
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    setChartFallback('projectChartEmpty', projectLabels, projectDataset);
+
+    // Course enrollments bar chart
+    const courseCtx = document.getElementById('courseChart').getContext('2d');
+    const courseLabels = [{% for c in course_data %}'{{ c.title|escapejs }}',{% endfor %}];
+    const courseDataset = [{
+        label: 'Enrollments',
+        data: [{% for c in course_data %}{{ c.enrollment_count|default:0 }},{% endfor %}],
+        backgroundColor: '#66bb6a'
+    }];
+    new Chart(courseCtx, {
+        type: 'bar',
+        data: {
+            labels: courseLabels,
+            datasets: courseDataset
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    setChartFallback('courseChartEmpty', courseLabels, courseDataset);
+
+    // Monthly donation trends line chart
+    const donationCtx = document.getElementById('donationChart').getContext('2d');
+    const donationLabels = [{% for dt in donation_trends %}'{{ dt.month|date:"F Y" }}',{% endfor %}];
+    const donationDataset = [{
+        label: 'Donations',
+        data: [{% for dt in donation_trends %}{{ dt.total|default:0 }},{% endfor %}],
+        borderColor: '#ff7043',
+        backgroundColor: 'rgba(255,112,67,0.2)',
+        fill: true,
+        tension: 0.3
+    }];
+    new Chart(donationCtx, {
+        type: 'line',
+        data: {
+            labels: donationLabels,
+            datasets: donationDataset
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    setChartFallback('donationChartEmpty', donationLabels, donationDataset);
+
+    // Attendance distribution pie chart
+    const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+    new Chart(attendanceCtx, {
+        type: 'pie',
+        data: {
+            labels: [{% for a in attendance_data %}'{{ a.attendance|escapejs }}',{% endfor %}],
+            datasets: [{
+                data: [{% for a in attendance_data %}{{ a.count|default:0 }},{% endfor %}],
+                backgroundColor: ['#f06292','#ba68c8','#4db6ac','#7986cb','#ffca28','#26a69a']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
                 }
             }
         }

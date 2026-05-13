@@ -38,6 +38,9 @@
                                 <dt class="col-sm-3">Name:</dt>
                                 <dd class="col-sm-9">{{ donor.name }}</dd>
 
+                                <dt class="col-sm-3">Organization:</dt>
+                                <dd class="col-sm-9">{{ donor.organization }}</dd>
+
                                 {% if donor.email %}
                                 <dt class="col-sm-3">Email:</dt>
                                 <dd class="col-sm-9"><a href="mailto:{{ donor.email }}">{{ donor.email }}</a></dd>
@@ -47,6 +50,14 @@
                                 <dt class="col-sm-3">Phone:</dt>
                                 <dd class="col-sm-9"><a href="tel:{{ donor.phone }}">{{ donor.phone }}</a></dd>
                                 {% endif %}
+
+                                {% if donor.project %}
+                                <dt class="col-sm-3">Project:</dt>
+                                <dd class="col-sm-9">{{ donor.project }}</dd>
+                                {% endif %}
+
+                                <dt class="col-sm-3">Donation Amount:</dt>
+                                <dd class="col-sm-9">{{ donor.donation_amount|default_if_none:'N/A' }}</dd>
 
                                 {% if donor.document %}
                                 <dt class="col-sm-3">Document:</dt>

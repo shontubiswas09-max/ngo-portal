@@ -1,5 +1,6 @@
 from django.db.models import Count, Sum
-from projects.models import Project, Donor, Recruitment
+from projects.models import Project, Recruitment
+from donors.models import Donor
 from beneficiaries.models import Beneficiary
 from lms.models import Course, Certification
 from reports.models import Report

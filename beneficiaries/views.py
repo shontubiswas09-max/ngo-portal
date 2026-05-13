@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Beneficiary
+from .forms import BeneficiaryForm
+from projects.models import Project
 
 def beneficiary_list(request):
     beneficiaries = Beneficiary.objects.all()
@@ -10,79 +12,33 @@ def beneficiary_list(request):
 @login_required(login_url='admin:login')
 def add_beneficiary(request):
     if request.method == 'POST':
-        try:
-            name = request.POST.get('name')
-            village = request.POST.get('village')
-            project_id = request.POST.get('project')
-            livelihood_activity = request.POST.get('livelihood_activity')
-            literacy_level = request.POST.get('literacy_level')
-            skills = request.POST.get('skills')
-            training_history = request.POST.get('training_history')
-            
-            if not name or not village or not project_id:
-                messages.error(request, 'Please fill in all required fields.')
-                return render(request, 'beneficiaries/add_beneficiary.html')
-            
-            from projects.models import Project
-            project = Project.objects.get(id=project_id)
-            
-            beneficiary = Beneficiary(
-                name=name,
-                village=village,
-                project=project,
-                livelihood_activity=livelihood_activity,
-                literacy_level=literacy_level,
-                skills=skills,
-                training_history=training_history
-            )
-            beneficiary.save()
-            messages.success(request, f'Beneficiary {name} added successfully!')
+        form = BeneficiaryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Beneficiary {form.cleaned_data["name"]} added successfully!')
             return redirect('beneficiaries:beneficiary_list')
-        except Exception as e:
-            messages.error(request, f'Error adding beneficiary: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = BeneficiaryForm()
     
-    from projects.models import Project
-    projects = Project.objects.all()
-    return render(request, 'beneficiaries/add_beneficiary.html', {'projects': projects})
+    return render(request, 'beneficiaries/add_beneficiary.html', {'form': form})
 
 @login_required(login_url='admin:login')
 def edit_beneficiary(request, pk):
     beneficiary = get_object_or_404(Beneficiary, pk=pk)
     if request.method == 'POST':
-        try:
-            name = request.POST.get('name')
-            village = request.POST.get('village')
-            project_id = request.POST.get('project')
-            livelihood_activity = request.POST.get('livelihood_activity')
-            literacy_level = request.POST.get('literacy_level')
-            skills = request.POST.get('skills')
-            training_history = request.POST.get('training_history')
-            
-            if not name or not village or not project_id:
-                messages.error(request, 'Please fill in all required fields.')
-                from projects.models import Project
-                projects = Project.objects.all()
-                return render(request, 'beneficiaries/add_beneficiary.html', {'beneficiary': beneficiary, 'projects': projects})
-            
-            from projects.models import Project
-            project = Project.objects.get(id=project_id)
-            
-            beneficiary.name = name
-            beneficiary.village = village
-            beneficiary.project = project
-            beneficiary.livelihood_activity = livelihood_activity
-            beneficiary.literacy_level = literacy_level
-            beneficiary.skills = skills
-            beneficiary.training_history = training_history
-            beneficiary.save()
-            messages.success(request, f'Beneficiary {name} updated successfully!')
+        form = BeneficiaryForm(request.POST, instance=beneficiary)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Beneficiary {form.cleaned_data["name"]} updated successfully!')
             return redirect('beneficiaries:beneficiary_list')
-        except Exception as e:
-            messages.error(request, f'Error updating beneficiary: {str(e)}')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = BeneficiaryForm(instance=beneficiary)
     
-    from projects.models import Project
-    projects = Project.objects.all()
-    return render(request, 'beneficiaries/add_beneficiary.html', {'beneficiary': beneficiary, 'projects': projects})
+    return render(request, 'beneficiaries/add_beneficiary.html', {'form': form, 'beneficiary': beneficiary})
 
 def beneficiary_detail(request, pk):
     beneficiary = get_object_or_404(Beneficiary, pk=pk)

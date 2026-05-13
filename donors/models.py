@@ -8,8 +8,8 @@ class Donor(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     profile_picture = models.ImageField(upload_to='donors/', blank=True, null=True)
     document = models.FileField(upload_to='donors/docs/', blank=True, null=True)
-    donation_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE)
+    donation_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, default=0)
+    project = models.ForeignKey('projects.Project', on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.name

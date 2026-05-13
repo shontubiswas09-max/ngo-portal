@@ -40,7 +40,9 @@ def register_models():
             list_filter = ("literacy_level", "project")
 
         class DonorAdmin(admin.ModelAdmin):
-            list_display = ('name', 'email', 'phone', 'profile_picture', 'document')
+            list_display = ('name', 'organization', 'email', 'phone', 'donation_amount', 'project')
+            search_fields = ('name', 'organization', 'email', 'phone')
+            list_filter = ('project',)
 
         class ProjectAdmin(admin.ModelAdmin):
             list_display = ('name', 'description', 'image')

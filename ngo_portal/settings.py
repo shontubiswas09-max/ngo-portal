@@ -24,7 +24,8 @@ SECRET_KEY = 'django-insecure-09furppbol0m=xw@0b%_tjj4*jnwluor3xpuhc-*=sim(4_3qj
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.1.12', '16.170.162.6']
+# For production, set DEBUG = False and add your domain/IP
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']  # Add your server domain/IP here for production
 
 
 # Application definition
@@ -125,8 +126,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ngo_db',
-        'USER': 'shontu-02',
-        'PASSWORD': 'Sh0ntu@2026#',
+        'USER': 'root',
+        'PASSWORD': 'Admin@2026',
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -143,9 +144,9 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'danger',
 }
-<<<<<<< HEAD
+#  HEAD
 
-# Authentication
-LOGIN_URL = 'admin:login'
-=======
->>>>>>> 7f09c376549711d49dedaec650f5b46b64e20bcb
+# # Authentication
+# LOGIN_URL = 'admin:login'
+
+# 7f09c376549711d49dedaec650f5b46b64e20bcb

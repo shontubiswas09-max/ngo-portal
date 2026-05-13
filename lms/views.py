@@ -5,7 +5,8 @@ from django.views.decorators.http import require_POST
 from django.db.models import Q, Count, Avg
 from django.utils import timezone
 from datetime import timedelta
-import json
+# import json
+from django.http import JsonResponse
 
 from beneficiaries.models import Beneficiary
 from .models import (
@@ -47,29 +48,45 @@ def course_detail(request, course_id):
     return render(request, 'lms/course_detail.html', context)
 
 
+@require_POST
 @login_required
 def enroll_course(request, course_id):
     """Enroll beneficiary in a course"""
     course = get_object_or_404(Course, id=course_id)
     
-    # Get beneficiary from request - you may need to adjust based on your user/beneficiary relationship
+    # Try to get beneficiary - handle both user relationship and direct lookup
+    beneficiary = None
     try:
+        # First try to find beneficiary linked to this user
         beneficiary = Beneficiary.objects.get(user=request.user)
-    except:
+    except Beneficiary.DoesNotExist:
+        # If user is not a beneficiary, return error
+        error_msg = 'You need to be registered as a beneficiary to enroll in courses. Please contact an administrator.'
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': error_msg}, status=400)
+        messages.warning(request, error_msg)
         return redirect('lms:course_list')
     
-    enrollment, created = Enrollment.objects.get_or_create(
-        course=course,
-        beneficiary=beneficiary
-    )
-    
-    if created:
-        # Initialize gamification points if not exists
-        GamificationPoints.objects.get_or_create(beneficiary=beneficiary)
-        return redirect('course_detail', course_id=course_id)
-    
-    return redirect('course_detail', course_id=course_id)
-
+    if beneficiary:
+        enrollment, created = Enrollment.objects.get_or_create(
+            course=course,
+            beneficiary=beneficiary
+        )
+        
+        if created:
+            # Initialize gamification points if not exists
+            GamificationPoints.objects.get_or_create(beneficiary=beneficiary)
+            success_msg = f'Successfully enrolled in {course.title}!'
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': success_msg, 'student_count': course.enrollments.count()})
+            messages.success(request, success_msg)
+            return redirect('lms:course_detail', course_id=course_id)
+        else:
+            info_msg = 'You are already enrolled in this course.'
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'message': info_msg}, status=200)
+            messages.info(request, info_msg)
+            return redirect('lms:course_detail', course_id=course_id)
 
 def lesson_detail(request, course_id, lesson_id):
     """Display lesson content"""
@@ -115,7 +132,7 @@ def take_quiz(request, quiz_id):
     
     try:
         beneficiary = Beneficiary.objects.get(user=request.user)
-    except:
+    except Beneficiary.DoesNotExist:
         return redirect('lms:course_list')
     
     # Get or create quiz attempt
@@ -150,7 +167,7 @@ def submit_quiz(request, attempt_id):
         beneficiary = Beneficiary.objects.get(user=request.user)
         if attempt.beneficiary != beneficiary:
             return JsonResponse({'error': 'Unauthorized'}, status=403)
-    except:
+    except Beneficiary.DoesNotExist:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
     # Calculate score
@@ -212,7 +229,7 @@ def gamification_dashboard(request):
     """Display gamification dashboard with points and badges"""
     try:
         beneficiary = Beneficiary.objects.get(user=request.user)
-    except:
+    except Beneficiary.DoesNotExist:
         return redirect('lms:course_list')
     
     gamification = GamificationPoints.objects.get_or_create(
@@ -256,7 +273,7 @@ def learner_dashboard(request):
     """Display learner dashboard with progress and recommendations"""
     try:
         beneficiary = Beneficiary.objects.get(user=request.user)
-    except:
+    except Beneficiary.DoesNotExist:
         return redirect('lms:course_list')
     
     # Get enrolled courses
