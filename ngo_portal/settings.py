@@ -147,7 +147,8 @@ MESSAGE_TAGS = {
 #  HEAD
 
 # Authentication
-LOGIN_URL = '/admin/login/'
+LOGIN_URL = '/accounts/login/'
+LOGOUT_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL = '/' 
 
 # 7f09c376549711d49dedaec650f5b46b64e20bcb
