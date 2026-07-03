@@ -56,9 +56,15 @@
                         <div class="card-footer bg-white">
                             <a href="{% url 'lms:course_detail' course.id %}" class="btn btn-primary btn-sm">View Details</a>
                             {% if user.is_authenticated %}
-                            <button class="btn btn-success btn-sm enroll-btn" data-course-id="{{ course.id }}" onclick="enrollCourse({{ course.id }})">
-                                <i class="fas fa-check"></i> Enroll Now
-                            </button>
+                                {% if beneficiary_exists %}
+                                <button class="btn btn-success btn-sm enroll-btn" data-course-id="{{ course.id }}" onclick="enrollCourse({{ course.id }})">
+                                    <i class="fas fa-check"></i> Enroll Now
+                                </button>
+                                {% else %}
+                                <a href="{% url 'lms:register_beneficiary' %}?course_id={{ course.id }}" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-user-plus"></i> Register to Enroll
+                                </a>
+                                {% endif %}
                             {% else %}
                             <a href="{% url 'admin:login' %}" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-lock"></i> Login to Enroll

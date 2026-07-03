@@ -140,11 +140,10 @@ def register_beneficiary(request):
     else:
         form = BeneficiaryForm()
 
-    return render(request, 'beneficiaries/add_beneficiary.html', {
+    return render(request, 'lms/register_beneficiary.html', {
         'form': form,
         'course': course,
         'course_id': course_id,
-        'register_mode': True,
     })
 
 
