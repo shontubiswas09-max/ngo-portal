@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-09furppbol0m=xw@0b%_tjj4*jnwluor3xpuhc-*=sim(4_3qj
 DEBUG = True
 
 # For production, set DEBUG = False and add your domain/IP
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']  # Add your server domain/IP here for production
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '51.20.104.114']  # Add your server domain/IP here for production
 
 
 # Application definition
