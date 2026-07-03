@@ -123,6 +123,12 @@ function enrollCourse(courseId) {
         .then(response => response.json())
         .then(data => {
             if (data.error) {
+                if (data.register_url) {
+                    if (confirm(data.error + ' Would you like to register now?')) {
+                        window.location.href = data.register_url;
+                        return;
+                    }
+                }
                 alert('Error: ' + data.error);
             } else {
                 alert('Successfully enrolled in the course!');

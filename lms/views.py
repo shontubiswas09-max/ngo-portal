@@ -1,13 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.db.models import Q, Count, Avg
 from django.utils import timezone
 from datetime import timedelta
-# import json
-from django.http import JsonResponse
 
+from beneficiaries.forms import BeneficiaryForm
 from beneficiaries.models import Beneficiary
 from .models import (
     Course, Lesson, Quiz, Question, QuizAttempt, Enrollment,
@@ -26,9 +27,11 @@ def course_list(request):
     if difficulty:
         courses = courses.filter(difficulty_level=difficulty)
     
+    beneficiary_exists = request.user.is_authenticated and Beneficiary.objects.filter(user=request.user).exists()
     context = {
         'courses': courses,
-        'difficulties': [('beginner', 'Beginner'), ('intermediate', 'Intermediate'), ('advanced', 'Advanced')]
+        'difficulties': [('beginner', 'Beginner'), ('intermediate', 'Intermediate'), ('advanced', 'Advanced')],
+        'beneficiary_exists': beneficiary_exists,
     }
     return render(request, 'lms/course_list.html', context)
 
@@ -39,13 +42,33 @@ def course_detail(request, course_id):
     lessons = course.lessons.all().order_by('order')
     quizzes = course.quizzes.all()
     
+    beneficiary_exists = request.user.is_authenticated and Beneficiary.objects.filter(user=request.user).exists()
     context = {
         'course': course,
         'lessons': lessons,
         'quizzes': quizzes,
         'student_count': course.enrollments.count(),
+        'beneficiary_exists': beneficiary_exists,
     }
     return render(request, 'lms/course_detail.html', context)
+
+
+def get_user_beneficiary(request):
+    if not request.user.is_authenticated:
+        return None
+    try:
+        return Beneficiary.objects.get(user=request.user)
+    except Beneficiary.DoesNotExist:
+        return None
+
+
+def get_user_beneficiary(request):
+    if not request.user.is_authenticated:
+        return None
+    try:
+        return Beneficiary.objects.get(user=request.user)
+    except Beneficiary.DoesNotExist:
+        return None
 
 
 @require_POST
@@ -53,40 +76,77 @@ def course_detail(request, course_id):
 def enroll_course(request, course_id):
     """Enroll beneficiary in a course"""
     course = get_object_or_404(Course, id=course_id)
-    
-    # Try to get beneficiary - handle both user relationship and direct lookup
-    beneficiary = None
-    try:
-        # First try to find beneficiary linked to this user
-        beneficiary = Beneficiary.objects.get(user=request.user)
-    except Beneficiary.DoesNotExist:
-        # If user is not a beneficiary, return error
-        error_msg = 'You need to be registered as a beneficiary to enroll in courses. Please contact an administrator.'
+    beneficiary = get_user_beneficiary(request)
+
+    if not beneficiary:
+        error_msg = 'You need to register as a beneficiary before enrolling in courses.'
+        register_url = reverse('lms:register_beneficiary') + f'?course_id={course_id}'
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({'error': error_msg}, status=400)
+            return JsonResponse({'error': error_msg, 'register_url': register_url}, status=400)
         messages.warning(request, error_msg)
-        return redirect('lms:course_list')
+        return redirect(register_url)
+
+    enrollment, created = Enrollment.objects.get_or_create(
+        course=course,
+        beneficiary=beneficiary
+    )
     
-    if beneficiary:
-        enrollment, created = Enrollment.objects.get_or_create(
-            course=course,
-            beneficiary=beneficiary
-        )
-        
-        if created:
-            # Initialize gamification points if not exists
-            GamificationPoints.objects.get_or_create(beneficiary=beneficiary)
-            success_msg = f'Successfully enrolled in {course.title}!'
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'success': True, 'message': success_msg, 'student_count': course.enrollments.count()})
-            messages.success(request, success_msg)
-            return redirect('lms:course_detail', course_id=course_id)
+    if created:
+        GamificationPoints.objects.get_or_create(beneficiary=beneficiary)
+        success_msg = f'Successfully enrolled in {course.title}!'
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'message': success_msg, 'student_count': course.enrollments.count()})
+        messages.success(request, success_msg)
+        return redirect('lms:course_detail', course_id=course_id)
+    else:
+        info_msg = 'You are already enrolled in this course.'
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'message': info_msg}, status=200)
+        messages.info(request, info_msg)
+        return redirect('lms:course_detail', course_id=course_id)
+
+
+@login_required
+def register_beneficiary(request):
+    course_id = request.GET.get('course_id') or request.POST.get('course_id')
+    course = None
+    if course_id:
+        course = get_object_or_404(Course, id=course_id)
+
+    existing_beneficiary = get_user_beneficiary(request)
+    if existing_beneficiary:
+        if course:
+            Enrollment.objects.get_or_create(course=course, beneficiary=existing_beneficiary)
+            messages.info(request, 'You are already registered as a beneficiary.')
+            return redirect('lms:course_detail', course_id=course.id)
+        messages.info(request, 'You are already registered as a beneficiary.')
+        return redirect('lms:course_list')
+
+    if request.method == 'POST':
+        form = BeneficiaryForm(request.POST)
+        if form.is_valid():
+            beneficiary = form.save(commit=False)
+            beneficiary.user = request.user
+            beneficiary.save()
+            if course:
+                Enrollment.objects.get_or_create(course=course, beneficiary=beneficiary)
+                GamificationPoints.objects.get_or_create(beneficiary=beneficiary)
+                messages.success(request, f'You are now registered and enrolled in {course.title}!')
+                return redirect('lms:course_detail', course_id=course.id)
+            messages.success(request, 'You are now registered as a beneficiary.')
+            return redirect('lms:course_list')
         else:
-            info_msg = 'You are already enrolled in this course.'
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'message': info_msg}, status=200)
-            messages.info(request, info_msg)
-            return redirect('lms:course_detail', course_id=course_id)
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = BeneficiaryForm()
+
+    return render(request, 'beneficiaries/add_beneficiary.html', {
+        'form': form,
+        'course': course,
+        'course_id': course_id,
+        'register_mode': True,
+    })
+
 
 def lesson_detail(request, course_id, lesson_id):
     """Display lesson content"""
