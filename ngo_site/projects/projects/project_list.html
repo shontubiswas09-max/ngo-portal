@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NGO Projects</title>
+</head>
+<body>
+    <h1>Rural Livelihood Projects</h1>
+    <ul>
+        {% for project in projects %}
+            <li>{{ project.name }} - {{ project.location }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
